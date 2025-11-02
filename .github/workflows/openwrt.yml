@@ -51,7 +51,6 @@ jobs:
         run: |
           echo "开始配置固件..."
           cp ./.github/workflows/.config ./openwrt/
-          make defconfig
           
           # 自动应用补丁
           if [ -d "../patches" ]; then
