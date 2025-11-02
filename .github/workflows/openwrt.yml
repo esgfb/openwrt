@@ -50,7 +50,7 @@ jobs:
       - name: Configure firmware
         run: |
           echo "开始配置固件..."
-          cp .config ./openwrt/
+          cp ./.github/workflows/.config ./openwrt/
           make defconfig
           
           # 自动应用补丁
