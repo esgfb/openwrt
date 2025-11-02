@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "克隆OpenWRT源码..."
           https://github.com/openwrt/openwrt/tags
-          cd lede
+          cd openwrt
           
           # 配置feeds
           echo "src-git packages https://git.openwrt.org/feed/packages.git" >> feeds.conf.default
