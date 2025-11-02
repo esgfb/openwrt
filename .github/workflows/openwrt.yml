@@ -27,7 +27,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential git subversion libncurses5-dev zlib1g-dev gawk gcc-multilib flex git-core device-tree-compiler quilt \
-            bc bison gcc-multilib g++-multilib lib32gcc1-dbg libssl-dev libncurses5-dev gperf python3-pip python3-dev \
+            bc bison gcc-multilib g++-multilib lib32gcc1 libssl-dev libncurses5-dev gperf python3-pip python3-dev \
             wget curl unzip rsync
           
           # 安装额外工具
