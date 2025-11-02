@@ -66,6 +66,9 @@ jobs:
       - name: Build
         run: |
           echo "开始编译固件..."
+          cd ./openwrt/
+          pwd
+          ls -la
           make -j$(nproc) V=sc
           echo "编译完成"
 
