@@ -31,7 +31,7 @@ jobs:
             wget curl unzip rsync
           
           # 安装额外工具
-          sudo pip3 install --upgrade setuptools wheel
+          sudo pip3 install --upgrade setuptools
           echo "环境配置完成"
 
       # 步骤3：获取源代码
