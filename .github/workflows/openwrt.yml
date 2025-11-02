@@ -50,7 +50,7 @@ jobs:
       - name: Configure firmware
         run: |
           echo "开始配置固件..."
-          cp ../.config .
+          cp .config .
           make defconfig
           
           # 自动应用补丁
