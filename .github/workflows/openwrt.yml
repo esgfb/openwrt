@@ -36,7 +36,7 @@ jobs:
             lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf \
             python3 python3-pyelftools python3-dev qemu-utils rsync scons squashfs-tools \
             subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            nscd quilt libxml-parser-perl
+            nscd quilt libxml-parser-perl coreutils
           # 升级 pip/setuptools/wheel 更稳妥（避免直接 sudo pip3）
           python3 -m pip install --upgrade pip setuptools wheel
           # 设置并启用 ccache
@@ -96,7 +96,9 @@ jobs:
           mips-openwrt-linux-gcc --version || true
           echo "单线程诊断完成。若工具链成功，请将并行构建命令取消注释以执行完整构建。"
           # 并行构建（若确认无错误，取消下面注释以启用）
-          # make -j$(nproc) V=sc
+          make -j$(nproc) V=sc
+          pwd
+          ls -la
 
       # 步骤6：上传产物
       - name: Upload Artifact
