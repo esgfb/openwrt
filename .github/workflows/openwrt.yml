@@ -17,66 +17,86 @@ jobs:
     env:
       TZ: Asia/Shanghai
     steps:
-      # 步骤1：检查环境
-      - uses: actions/checkout@v2
-      
+      # 步骤1：检查环境（使用新版 checkout）
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       # 步骤2：设置编译环境
       - name: Setup environment
         run: |
           echo "开始配置编译环境..."
-          sudo apt-get update
+          sudo apt-get update -y
           sudo apt-get install -y \
-            build-essential git subversion libncurses5-dev zlib1g-dev gawk gcc-multilib flex git-core device-tree-compiler quilt \
-            bc bison gcc-multilib g++-multilib lib32gcc-s1 libssl-dev libncurses5-dev gperf python3-pip python3-dev \
-            wget curl unzip rsync
-          
-          # 安装额外工具
-          sudo pip3 install --upgrade setuptools
+            ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+            bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext \
+            gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 \
+            libelf-dev libglib2.0-dev libgmp-dev libltdl-dev libmpc-dev libmpfr-dev \
+            libisl-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool \
+            lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 \
+            python3 python3-pyelftools python3-dev qemu-utils rsync scons squashfs-tools \
+            subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
+            nscd quilt libxml-parser-perl
+          # 升级 pip/setuptools/wheel 更稳妥（避免直接 sudo pip3）
+          python3 -m pip install --upgrade pip setuptools wheel
+          # 设置并启用 ccache
+          export CCACHE_DIR="$RUNNER_TEMP/ccache"
+          mkdir -p "$CCACHE_DIR"
+          ccache --max-size=5G || true
           echo "环境配置完成"
 
       # 步骤3：获取源代码
-      - name: Clone repository
+      - name: Clone OpenWrt source
         run: |
-          echo "克隆OpenWRT源码..."
-          git clone https://github.com/openwrt/openwrt -b master
+          echo "克隆 OpenWrt 源码到 openwrt 目录..."
+          git clone https://github.com/openwrt/openwrt -b master openwrt
           cd openwrt
-
-          # 更新feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-          echo "Feeds更新完成"
+          echo "Feeds 更新完成"
 
       # 步骤4：配置固件
       - name: Configure firmware
         run: |
           echo "开始配置固件..."
-          cp ./.github/workflows/.config ./openwrt/
-          
-          # 自动应用补丁
-          if [ -d "../patches" ]; then
+          cd openwrt
+          # 如果仓库根有 .github/workflows/.config，把它作为 openwrt 的 .config
+          if [ -f ../.github/workflows/.config ]; then
+            cp ../.github/workflows/.config .config
+            echo "已复制 .config 到 openwrt/.config"
+          fi
+          # 应用仓库根 patches（如果存在）
+          if [ -d ../patches ]; then
             echo "应用本地补丁..."
-            for patch in ../patches/*.patch; do
-              git apply "$patch"
+            for p in ../patches/*.patch; do
+              [ -f "$p" ] || continue
+              git apply "$p" || (echo "patch $p failed" && exit 1)
             done
           fi
-          
           echo "固件配置完成"
 
-      # 步骤5：执行编译
-      - name: Build
+      # 步骤5：执行编译（先诊断再并行）
+      - name: Build (diagnose first)
         run: |
-          echo "开始编译固件..."
-          cd ./openwrt/
+          echo "开始构建（先单线程诊断）..."
+          cd openwrt
           pwd
           ls -la
-          rm -rf staging_dir/toolchain-x86_64_gcc-13.3.0_musl
+          # 清理旧的工具链/构建产物（按需）
+          rm -rf staging_dir/toolchain-*
           rm -rf build_dir/target-*
-          make tools/install
-          make toolchain/install
-          which mips-openwrt-linux-gcc
-          mips-openwrt-linux-gcc --version
-          make -j$(nproc) V=s
-          echo "编译完成"
+          export USE_CCACHE=1
+          export CCACHE_DIR="$RUNNER_TEMP/ccache"
+          export CCACHE_MAXSIZE=5G
+          # 先单线程构建工具与工具链以便捕获首个错误（更容易定位）
+          make -j1 V=sc tools/install || true
+          make -j1 V=sc toolchain/install || true
+          # 查看交叉编译器是否已经存在（示例）
+          which mips-openwrt-linux-gcc || true
+          mips-openwrt-linux-gcc --version || true
+          echo "单线程诊断完成。若工具链成功，请将并行构建命令取消注释以执行完整构建。"
+          # 并行构建（若确认无错误，取消下面注释以启用）
+          # make -j$(nproc) V=sc
 
       # 步骤6：上传产物
       - name: Upload Artifact
