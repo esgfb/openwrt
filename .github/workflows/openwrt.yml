@@ -38,7 +38,7 @@ jobs:
       - name: Clone repository
         run: |
           echo "克隆OpenWRT源码..."
-          git clone https://github.com/coolsnowwolf/lede
+          https://github.com/openwrt/openwrt/tags
           cd lede
           
           # 配置feeds
@@ -78,7 +78,7 @@ jobs:
 
       # 步骤6：上传产物
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: openwrt-firmware
           path: bin/targets/x86/64/lede-x86-64-generic-squashfs-combined.efi.img
