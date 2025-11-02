@@ -69,7 +69,13 @@ jobs:
           cd ./openwrt/
           pwd
           ls -la
-          make -j$(nproc) V=sc
+          rm -rf staging_dir/toolchain-x86_64_gcc-13.3.0_musl
+          rm -rf build_dir/target-*
+          make tools/install
+          make toolchain/install
+          which mips-openwrt-linux-gcc
+          mips-openwrt-linux-gcc --version
+          make -j$(nproc) V=s
           echo "编译完成"
 
       # 步骤6：上传产物
@@ -77,11 +83,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openwrt-firmware
-          path: bin/targets/x86/64/lede-x86-64-generic-squashfs-combined.efi.img
-
-      # 步骤7：清理工作空间
-      - name: Cleanup
-        run: |
-          echo "清理工作空间..."
-          rm -rf ~/openwrt
-          echo "清理完成"
+          path: bin/
