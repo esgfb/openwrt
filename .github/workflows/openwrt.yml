@@ -40,13 +40,7 @@ jobs:
           echo "克隆OpenWRT源码..."
           git clone https://github.com/openwrt/openwrt -b master
           cd openwrt
-          
-          # 配置feeds
-          echo "src-git packages https://git.openwrt.org/feed/packages.git" >> feeds.conf.default
-          echo "src-git luci https://git.openwrt.org/project/luci.git" >> feeds.conf.default
-          echo "src-git routing https://git.openwrt.org/feed/routing.git" >> feeds.conf.default
-          echo "src-git telephony https://git.openwrt.org/feed/telephony.git" >> feeds.conf.default
-          
+
           # 更新feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
