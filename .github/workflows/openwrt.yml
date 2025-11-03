@@ -91,7 +91,7 @@ jobs:
           export CCACHE_DIR="$RUNNER_TEMP/ccache"
           export CCACHE_MAXSIZE=5G
           
-          # 构建工具链
+          # 单线程构建工具链
           make -j$(nproc) V=sc tools/install
           make -j$(nproc) V=sc toolchain/install
           echo "工具链构建完成。"
