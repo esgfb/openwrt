@@ -80,33 +80,47 @@ jobs:
           fi
           echo "固件配置完成"
 
-      # 步骤5：执行编译（先诊断再并行）
-      - name: Build (diagnose first)
+      # 步骤5：执行编译（构建工具链）
+      - name: Build Tools & Compile Privoxy
         run: |
-          echo "开始构建（先单线程诊断）..."
+          echo "开始构建工具链"
           cd openwrt
-          pwd
-          ls -la
+
           # 启用 ccache 缓存功能,设置缓存文件存储位置,限制缓存大小为 5GB
           export USE_CCACHE=1
           export CCACHE_DIR="$RUNNER_TEMP/ccache"
           export CCACHE_MAXSIZE=5G
-          # 先单线程构建工具与工具链以便捕获首个错误（更容易定位）
-          make -j1 V=sc tools/install || true
-          make -j1 V=sc toolchain/install || true
-          # 查看交叉编译器是否已经存在（示例）
-          which mips-openwrt-linux-gcc || true
-          mips-openwrt-linux-gcc --version || true
-          echo "单线程诊断完成。若工具链成功，请将并行构建命令取消注释以执行完整构建。"
-          make download -j$(nproc)
-          # 基于之前报错，暂先单独编译privoxy包
-          make package/privoxy/{clean,compile} V=s
-          pwd
-          ls -la
-          # 多线程并行构建（若确认无错误，取消下面注释以启用）
-          make -j$(nproc) V=sc
           
-      # 步骤6：上传产物
+          # 构建工具链
+          make -j$(nproc) V=sc tools/install
+          make -j$(nproc) V=sc toolchain/install
+          echo "工具链构建完成。"
+          pwd
+          
+      # 步骤6：执行完整编译
+      - name: Full Parallel Build
+        run: |
+          echo "开始完整并行构建..."
+          cd openwrt
+
+          # 启用 ccache 缓存功能,设置缓存文件存储位置,限制缓存大小为 5GB
+          export USE_CCACHE=1
+          export CCACHE_DIR="$RUNNER_TEMP/ccache"
+          export CCACHE_MAXSIZE=5G
+          
+          make download -j$(nproc)
+          
+          # 单独编译 privoxy 并输出详细日志
+          make package/privoxy/{clean,compile} V=s
+          echo "单独编译 privoxy 完成。"
+          
+          make -j$(nproc) V=sc
+
+          # 检查编译产物目录
+          ls -la
+          pwd
+
+      # 步骤7：上传产物
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
