@@ -65,7 +65,7 @@ jobs:
             cp ../.github/workflows/.config .config
             echo "已复制 .config 到 openwrt/.config"
           fi
-          cp ../.github/workflows/gcc-13.3.0.tar.xz /home/runner/work/openwrt/openwrt/openwrt/dl/
+          
           # 应用仓库根 patches（如果存在）
           if [ -d ../patches ]; then
             echo "应用本地补丁..."
