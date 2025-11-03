@@ -53,6 +53,10 @@ jobs:
           cd openwrt
           ./scripts/feeds update -a
           ./scripts/feeds install -a
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          ./scripts/feeds update packages
+          ./scripts/feeds install -a -p packages
           echo "Feeds 更新完成"
 
       # 步骤4：配置固件
@@ -98,6 +102,7 @@ jobs:
           echo "单线程诊断完成。若工具链成功，请将并行构建命令取消注释以执行完整构建。"
           # 并行构建（若确认无错误，取消下面注释以启用）
           make download -j$(nproc)
+          make package/privoxy/{clean,compile} V=s
           pwd
           ls -la
           make -j$(nproc) V=sc
