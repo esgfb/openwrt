@@ -26,19 +26,11 @@ jobs:
       - name: Setup environment
         run: |
           echo "开始配置编译环境..."
-          sudo apt-get update -y
-          sudo apt-get install -y \
-            ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
-            bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext \
-            gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 \
-            libelf-dev libglib2.0-dev libgmp-dev libltdl-dev libmpc-dev libmpfr-dev \
-            libisl-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool \
-            lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf \
-            python3 python3-pyelftools python3-dev qemu-utils rsync scons squashfs-tools \
-            subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev \
-            nscd quilt libxml-parser-perl coreutils
-          # 升级 pip/setuptools/wheel 更稳妥（避免直接 sudo pip3）
-          python3 -m pip install --upgrade pip setuptools wheel
+          sudo apt update
+          sudo apt install -y build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python3 python3-dev rsync subversion \
+          swig time unzip wget xsltproc zlib1g-dev
           # 设置并启用 ccache
           export CCACHE_DIR="$RUNNER_TEMP/ccache"
           mkdir -p "$CCACHE_DIR"
