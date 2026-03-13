@@ -1,0 +1,29 @@
+msgid ""
+msgstr ""
+
+msgid "PowerOFF"
+msgstr "关机"
+
+msgid "Poweroff the operating system of your device"
+msgstr "关闭设备上的操作系统"
+
+msgid "There are unsaved changes that will get lost on poweroff!"
+msgstr "有未保存的设置将会在关机后丢失"
+
+msgid "Perform poweroff"
+msgstr "执行关机"
+
+msgid "Device is shutting down..."
+msgstr "设备正在关机..."
+
+msgid "Loading"
+msgstr "加载中"
+
+msgid "Waiting for device..."
+msgstr "等待设备..."
+
+msgid "Shutdown successful"
+msgstr "关闭成功"
+
+msgid "Shutdown unsuccessful"
+msgstr "关闭失败"

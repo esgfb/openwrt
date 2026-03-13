@@ -1,0 +1,11 @@
+{
+	"luci-app-tcpdump": {
+		"description": "Grant UCI access for luci-app-tcpdump",
+		"read": {
+			"uci": ["tcpdump"]
+		},
+		"write": {
+			"uci": ["tcpdump"]
+		}
+	}
+}

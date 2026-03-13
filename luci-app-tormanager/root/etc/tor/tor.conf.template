@@ -1,0 +1,10 @@
+GeoIPFile /usr/share/tor/geoip
+GeoIPv6File /usr/share/tor/geoip6
+HashedControlPassword 16:4EBBCAE312566D2460B312949DF6A7B3ADC4E41A6169CE4F5C369CB77E
+ExcludeNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{vn},{ph},{my},{cu},{cl},{ci},{cr},{ee},{es},{gr},{il},{kz},{kw},{lk},{lt},{lv},{kp},{sy},{cu},{tw},{st},{ve},{eg},{kh},{la},{mm},{tr},{ua},{ye},{tk},{br},{pa},{lu},{do},{bf},{in},{id},{sv},{va},{??}
+ExcludeExitNodes {cn},{hk},{sg},{pk},{th},{mo},{cl},{ci},{cr},{ee},{es},{gr},{il},{kz},{kw},{lk},{lt},{lv},{by},{ru},{ir},{vn},{ph},{my},{cu},{br},{tk},{tw},{kp},{sy}
+CookieAuthentication 1
+AvoidDiskWrites 1
+DirReqStatistics 0
+HiddenServiceStatistics 0
+StrictNodes 1

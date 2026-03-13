@@ -1,0 +1,76 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2023-202x byz <byz@openwrt.org>
+
+START=90
+
+USE_PROCD=1
+
+createLink() {
+	local uciNum=$1
+	local linkNum=$2
+	[ -d /var/etc/tor ] || mkdir -m 755 -p /var/etc/tor
+	chmod 0755 /var/etc/tor
+	# torrcPath="/etc/tor/torrc$linkNum"
+	torrcPath="/var/etc/tor/torrc$linkNum" #先将Tor的配置写入内存，减少对磁盘的写入操作。
+	# 加入全局设置
+	cat /etc/tor/tor.conf.template > "$torrcPath"
+	# 追加可变参数
+	[ -d "/etc/tor/data/$linkNum" ] || mkdir -p "/etc/tor/data/$linkNum"
+	echo "DataDirectory /etc/tor/data/$linkNum" >> "$torrcPath"
+
+	ControlPort="$(uci get "tor.@node[$uciNum].Controlport")"
+	echo "ControlPort $ControlPort" >> "$torrcPath"
+
+	SocksPort="$(uci get "tor.@node[$uciNum].SocksPort")"
+	echo "SocksPort 0.0.0.0:$SocksPort IPv6Traffic PreferIPv6 KeepAliveIsolateSOCKSAuth" >> "$torrcPath"
+
+	case "$(uci get "tor.@node[$uciNum].proxyType")" in
+	https)
+		local Proxy="HTTPSProxy $(uci get "tor.@node[$uciNum].proxyIP"):$(uci get "tor.@node[$uciNum].proxyPort")"
+		;;
+	socks5)
+		local Proxy="Socks5Proxy $(uci get "tor.@node[$uciNum].proxyIP"):$(uci get "tor.@node[$uciNum].proxyPort")"
+		;;
+	esac
+	[ -n "${Proxy}" ] && echo "$Proxy" >> "$torrcPath"
+
+	ExitNodes="$(uci get "tor.@node[$uciNum].ExitNodes" | sed "s/,$//g;s/\ //g")"
+	echo "ExitNodes $ExitNodes" >> "$torrcPath"
+
+	[ -e "/etc/tor/torrc$linkNum" ] || ln -nsf $torrcPath /etc/tor/torrc$linkNum
+}
+
+reload_service() {
+	start
+}
+
+start_service() {
+	local numErg=
+	local linkNum=$(uci show tor | grep -E "@node\[.*\]=node" | wc -l)
+	# 创建配置文件和相应的文件夹
+	if [ "$linkNum" -ge 1 ];then
+		for i in $(seq "$linkNum")
+		do
+			numErg=$numErg$i
+			createLink "$(( i - 1 ))" "$i"
+		done
+	else
+		rm -r /etc/tor/data/* /etc/tor/torrc*
+	fi
+
+	# 删除多余的Tor配置文件夹
+	for var in $(ls /etc/tor/data | egrep -v "^[$numErg]$")
+	do
+		[ -d /etc/tor/data/$var ] && rm -rf "/etc/tor/data/$var"
+	done
+
+	# 删除多余的Tor配置文件
+	for var in $(ls /etc/tor | grep "torrc" | egrep -v "^torrc[$numErg]$")
+	do
+		[ -e "/etc/tor/$var" ] && rm -f "/etc/tor/$var"
+	done
+}
+
+service_triggers() {
+	procd_add_reload_trigger tor
+}

@@ -1,0 +1,54 @@
+<%#
+ Copyright 2008 Steven Barth <steven@midlink.org>
+ Copyright 2008-2015 Jo-Philipp Wich <jow@openwrt.org>
+ Licensed to the public under the Apache License 2.0.
+-%>
+
+<%+header%>
+
+<h2 name="content"><%:PowerOFF%></h2>
+
+<p><%:Poweroff the operating system of your device%></p>
+
+<%- local c = require("luci.model.uci").cursor():changes(); if c and next(c) then -%>
+	<p class="alert-message warning"><%:Warning: There are unsaved changes that will get lost on poweroff!%></p>
+<%- end -%>
+
+<hr />
+
+<input class="cbi-button cbi-button-action important" type="button" value="<%:Perform poweroff%>" onclick="poweroff(this)" />
+
+<p class="alert-message notice poweroff-message" style="display:none">
+	<img src="<%=resource%>/icons/loading.gif" alt="<%:Loading%>" style="vertical-align:middle" />
+	<span><%:Device is shutting down...%></span>
+</p>
+
+<script type="text/javascript">//<![CDATA[
+	var tries = 0,
+		message = document.querySelector('p.poweroff-message'),
+	    label = message.querySelector('span');
+
+	function poweroff(button) {
+		button.style.display = 'none';
+		message.style.display = '';
+		label.innerHTML = '<%:Waiting for device...%>';
+
+		(new XHR()).post('<%=url("admin/system/poweroff/call")%>', { token: '<%=token%>' },
+			function(x, data) {
+				if (data) {
+					if (data.running) {
+						message.classList.remove('notice');
+						message.classList.add('warning');
+						label.innerHTML = '<%:Shutdown successful%>';
+					} else {
+						message.classList.remove('notice');
+						message.classList.add('warning');
+						label.innerHTML = '<%:Shutdown unsuccessful%>';
+					}
+				}
+			}
+		);
+	}
+//]]></script>
+
+<%+footer%>

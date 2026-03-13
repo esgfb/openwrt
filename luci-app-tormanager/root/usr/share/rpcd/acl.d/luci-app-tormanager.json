@@ -1,0 +1,27 @@
+{
+	"luci-app-tormanager": {
+		"description": "Tor Manager",
+		"read": {
+			"file": {
+				"/etc/tor/torrc*": [ "read" ],
+				"/etc/config/tor": [ "read" ],
+				"/usr/bin/tor": [ "exec" ],
+				"/etc/init.d/tor": [ "exec" ],
+				"/bin/busybox": [ "exec" ],
+				"/sbin/uci": [ "exec" ],
+				"/tmp/tor*": [ "read" ],
+				"/etc/tor/tor.conf.template": [ "read" ],
+				"/etc/config/scp/controlTor.sh": [ "exec" ]
+			},
+			"uci": [ "tor" ]
+		},
+		"write": {
+			"file": {
+				"/etc/tor/torrc*": [ "write" ],
+				"/etc/tor/tor.conf.template": [ "write" ],
+				"/tmp/tor*": [ "write" ]
+			},
+			"uci": [ "tor" ]
+		}
+	}
+}

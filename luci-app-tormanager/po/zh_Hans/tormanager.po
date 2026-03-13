@@ -1,0 +1,135 @@
+"PO-Revision-Date: 2023-04-06 16:35+0800\n"
+"Language-Team: Chinese (Simplified)\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 1.8.2\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"MIME-Version: 1.0\n"
+"Language: zh_CN\n"
+"Last-Translator: \n"
+
+#: root/usr/share/luci/menu.d/luci-app-tormanager.json:3
+msgid "Tor Manager"
+msgstr "Tor 管理"
+
+#: root/usr/share/luci/menu.d/luci-app-tormanager.json:30
+msgid "Edit Template"
+msgstr "编辑模板"
+
+#: htdocs/luci-static/resources/view/tormanager/editpl.js:10
+msgid "Template Edit"
+msgstr "模板编辑"
+
+#: htdocs/luci-static/resources/view/tormanager/editpl.js:16
+msgid "This is the content of the file '/etc/tor/tor.conf.template' from which your tor configuration will be generated."
+msgstr "这是将从其上生成 tor 配置的文件“/etc/tor/tor.conf.template”的内容。"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:23
+msgid "Tor - Link Manage"
+msgstr "Tor - 链路管理"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:23
+msgid "Link Overview"
+msgstr "链路概览"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:27
+msgid "Add Links"
+msgstr "添加链路"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:28
+msgid "Tor Listen Port"
+msgstr "Tor 监听端口"
+
+msgid "Type: SOCKS5"
+msgstr "类型：SOCKS5"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:31
+msgid "Control Port"
+msgstr "控制端口"
+
+msgid "Tor control port"
+msgstr "Tor 控制端口"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:34
+msgid "Up Proxy"
+msgstr "前置代理"
+
+msgid "Ip address for proxy"
+msgstr "代理服务器IP地址"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:39
+msgid "Up ProxyType"
+msgstr "前置代理类型"
+
+msgid "Proxy protocol type"
+msgstr "代理协议类型"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:45
+msgid "Proxy Port"
+msgstr "代理端口"
+
+msgid "Up proxy port"
+msgstr "前置代理端口"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:50
+msgid "Exit Node"
+msgstr "出口节点"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:39
+msgid "Exit country node for tor"
+msgstr "Tor出口节点国家"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:51-58
+msgid "United States"
+msgstr "美国"
+
+msgid "Germany"
+msgstr "德国"
+
+msgid "Great Britain"
+msgstr "英国"
+
+msgid "Japan"
+msgstr "日本"
+
+msgid "Canada"
+msgstr "加拿大"
+
+msgid "Australia"
+msgstr "澳大利亚"
+
+msgid "Italy"
+msgstr "意大利"
+
+msgid "France"
+msgstr "法国"
+
+#: htdocs/luci-static/resources/view/tormanager/node.js:60
+msgid "Please select exit node country"
+msgstr "请选择出口国家"
+
+#: htdocs/luci-static/resources/view/tormanager/status.js:27
+msgid "Instance %s is not running"
+msgstr "实例 %s 未开启"
+
+#: htdocs/luci-static/resources/view/tormanager/status.js:102
+msgid "Tor - Program Status"
+msgstr "Tor - 程序状态"
+
+#: htdocs/luci-static/resources/view/tormanager/status.js:117
+msgid "Start instance %s"
+msgstr "启动实例 %s"
+
+#: htdocs/luci-static/resources/view/tormanager/status.js:135
+msgid "Link %s - ListenPort: %s"
+msgstr "链路 %s — 监听端口：%s"
+
+#: htdocs/luci-static/resources/view/tormanager/status.js:140
+msgid "Start Tor"
+msgstr "启动 Tor"
+
+#: htdocs/luci-static/resources/view/tormanager/status.js:151
+msgid "Logs"
+msgstr "日志"
