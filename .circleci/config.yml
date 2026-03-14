@@ -2,7 +2,8 @@ version: 2.1
 
 jobs:
   build-openwrt:
-    machine: true
+    docker:
+      - image: openwrtorg/sdk:x86-64  # docker 执行器
     environment:
       TZ: Asia/Shanghai
     steps:
