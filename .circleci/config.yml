@@ -61,7 +61,15 @@ jobs:
           make defconfig
           echo "=== 运行 make prepare ==="
           make prepare -j2 V=sc
-      
+          
+      # === 新增：单独编译 Go 工具链 ===
+      - run: |
+          cd $SDK_PATH
+          echo "=== 单独编译 Go 工具链（避免后续超时） ==="
+          make package/feeds/packages/golang-bootstrap/{clean,compile} -j2
+          make package/feeds/packages/golang/{clean,compile} -j2
+          echo "✅ Go 工具链编译完成"
+    
       # 第四步：完整编译
       - run: |
           cd $SDK_PATH
