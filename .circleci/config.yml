@@ -75,7 +75,7 @@ jobs:
           cd $SDK_PATH
           echo "=== 开始完整编译 ==="
           mkdir -p /home/circleci/project/build-logs
-          make -j2 V=sc 2>&1 | tee /home/circleci/project/build-logs/full-build.log
+          make -j2 V=99 2>&1 | tee /home/circleci/project/build-logs/full-build.log
           tail -100 /home/circleci/project/build-logs/full-build.log > /home/circleci/project/build-logs/last-100.log
           echo "✅ 编译完成"
       
