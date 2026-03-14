@@ -4,7 +4,6 @@ jobs:
   build-openwrt:
     machine:
       image: ubuntu-2404:2026.02.2
-    resource_class: large  # 4核/8GB
     environment:
       TZ: Asia/Shanghai
     steps:
