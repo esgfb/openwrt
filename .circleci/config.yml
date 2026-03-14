@@ -3,12 +3,54 @@ version: 2.1
 jobs:
   build-openwrt:
     docker:
-      - image: openwrt/sdk:x86-64  # 把 openwrtorg 改成 openwrt
+      - image: openwrt/sdk:x86-64  # 改用 openwrt/ 命名空间
     environment:
       TZ: Asia/Shanghai
     steps:
       - checkout
-      - run: pwd && ls -la && ls -la ..
+      
+      # 确认当前目录（应该和刚才探测的一样）
+      - run: pwd && ls -la
+      
+      # 复制自定义 Luci 应用（注意：不需要 cd openwrt，因为 SDK 镜像里可能没有 openwrt 目录）
+      - run: |
+          # 先看看 SDK 镜像的结构
+          ls -la
+          
+          # 把自定义应用复制到 SDK 的 package 目录
+          cp -r luci-app-nfs package/ || { echo "❌ 复制 luci-app-nfs 失败"; exit 1; }
+          cp -r luci-app-poweroff package/ || { echo "❌ 复制 luci-app-poweroff 失败"; exit 1; }
+          cp -r luci-app-rclone package/ || { echo "❌ 复制 luci-app-rclone 失败"; exit 1; }
+          cp -r luci-app-tcpdump package/ || { echo "❌ 复制 luci-app-tcpdump 失败"; exit 1; }
+          cp -r luci-app-tormanager package/ || { echo "❌ 复制 luci-app-tormanager 失败"; exit 1; }
+          
+          # 复制配置文件
+          cp feeds.conf.default .
+          cp .config .
+          
+          # 更新 feeds
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+      
+      # 编译准备
+      - run: |
+          make defconfig
+          make prepare -j2 V=sc
+      
+      # 完整编译
+      - run: |
+          mkdir -p ../build-logs
+          make -j2 V=sc 2>&1 | tee ../build-logs/full-build.log
+          tail -100 ../build-logs/full-build.log > ../build-logs/last-100.log
+      
+      # 保存固件
+      - store_artifacts:
+          path: ./bin
+          destination: openwrt-firmware
+      
+      - store_artifacts:
+          path: ../build-logs
+          destination: build-logs
 
 workflows:
   version: 2
