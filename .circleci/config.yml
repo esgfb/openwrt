@@ -2,26 +2,38 @@ version: 2.1
 
 jobs:
   build-openwrt:
-    docker:
-      - image: openwrtorg/sdk:x86-64
+    machine: true
     environment:
       TZ: Asia/Shanghai
     steps:
       - checkout
       
-      # 确认当前目录（只保留一个）
-      - run: pwd && ls -la
-      
-      # 复制自定义 Luci 应用
+      # 第一步：安装 SDK 并保存路径
       - run: |
-          echo "=== 复制自定义应用到 package/ ==="
-          cp -r luci-app-nfs package/ || { echo "❌ 复制 luci-app-nfs 失败"; exit 1; }
-          cp -r luci-app-poweroff package/ || { echo "❌ 复制 luci-app-poweroff 失败"; exit 1; }
-          cp -r luci-app-rclone package/ || { echo "❌ 复制 luci-app-rclone 失败"; exit 1; }
-          cp -r luci-app-tcpdump package/ || { echo "❌ 复制 luci-app-tcpdump 失败"; exit 1; }
-          cp -r luci-app-tormanager package/ || { echo "❌ 复制 luci-app-tormanager 失败"; exit 1; }
+          echo "=== 安装 OpenWrt SDK 环境 ==="
+          # 下载并解压 SDK
+          wget https://downloads.openwrt.org/releases/25.12.0/targets/x86/64/openwrt-sdk-25.12.0-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.xz
+          tar -xf openwrt-sdk-*.tar.xz
+          rm openwrt-sdk-*.tar.xz
+          # 进入解压后的目录并记录路径
+          cd openwrt-sdk-*/
+          SDK_PATH=$(pwd)
+          echo "SDK_PATH=$SDK_PATH" >> $BASH_ENV
+          echo "✅ SDK 安装完成，路径: $SDK_PATH"
+      
+      # 第二步：复制自定义应用和配置
+      - run: |
+          cd $SDK_PATH
+          echo "=== 当前 SDK 目录: $(pwd) ==="
           
-          # 追加 passwall 源到 feeds.conf.default
+          # 复制自定义 Luci 应用（注意源路径）
+          cp -r /home/circleci/project/luci-app-nfs package/ || { echo "❌ 复制 luci-app-nfs 失败"; exit 1; }
+          cp -r /home/circleci/project/luci-app-poweroff package/ || { echo "❌ 复制 luci-app-poweroff 失败"; exit 1; }
+          cp -r /home/circleci/project/luci-app-rclone package/ || { echo "❌ 复制 luci-app-rclone 失败"; exit 1; }
+          cp -r /home/circleci/project/luci-app-tcpdump package/ || { echo "❌ 复制 luci-app-tcpdump 失败"; exit 1; }
+          cp -r /home/circleci/project/luci-app-tormanager package/ || { echo "❌ 复制 luci-app-tormanager 失败"; exit 1; }
+          
+          # 追加 passwall 源
           echo "=== 添加 passwall feeds ==="
           grep -q "passwall_packages" feeds.conf.default || \
           echo "src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main" >> feeds.conf.default
@@ -30,38 +42,40 @@ jobs:
           grep -q "passwall2_luci" feeds.conf.default || \
           echo "src-git passwall2_luci https://github.com/Openwrt-Passwall/openwrt-passwall2.git;main" >> feeds.conf.default
           
-          # 更新 feeds（先更新，因为 .config 里可能引用这些源）
+          # 更新 feeds
           echo "=== 更新 feeds ==="
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           
-          # **关键：更新完 feeds 后再复制 .config**
+          # 复制你的 .config（注意源路径）
           echo "=== 用你的 .config 覆盖默认配置 ==="
-          cp -f /builder/project/.config .config
+          cp -f /home/circleci/project/.config .config
           echo "✅ 已用你的配置覆盖 SDK 默认配置"
       
-      # 编译准备
+      # 第三步：编译准备
       - run: |
+          cd $SDK_PATH
           echo "=== 运行 make defconfig ==="
           make defconfig
           echo "=== 运行 make prepare ==="
           make prepare -j2 V=sc
       
-      # 完整编译
+      # 第四步：完整编译
       - run: |
+          cd $SDK_PATH
           echo "=== 开始完整编译 ==="
-          mkdir -p ../build-logs
-          make -j2 V=sc 2>&1 | tee ../build-logs/full-build.log
-          tail -100 ../build-logs/full-build.log > ../build-logs/last-100.log
+          mkdir -p /home/circleci/project/build-logs
+          make -j2 V=sc 2>&1 | tee /home/circleci/project/build-logs/full-build.log
+          tail -100 /home/circleci/project/build-logs/full-build.log > /home/circleci/project/build-logs/last-100.log
           echo "✅ 编译完成"
       
-      # 保存固件
+      # 第五步：保存固件
       - store_artifacts:
-          path: ./bin
+          path: $SDK_PATH/bin
           destination: openwrt-firmware
       
       - store_artifacts:
-          path: ../build-logs
+          path: /home/circleci/project/build-logs
           destination: build-logs
 
 workflows:
