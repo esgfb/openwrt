@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build-openwrt:
     machine:
-      - image: ubuntu:22.04
+      image: ubuntu-2204:2023.09.1
     resource_class: large  # 4核/8GB
     environment:
       TZ: Asia/Shanghai
