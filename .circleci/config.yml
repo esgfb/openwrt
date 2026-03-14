@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build-openwrt:
     docker:
-      - image: openwrt/sdk:25.12-x86-64
+      - image: openwrtorg/sdk:x86-64
     environment:
       TZ: Asia/Shanghai
     steps:
