@@ -3,6 +3,7 @@ version: 2.1
 jobs:
   build-openwrt:
     machine: true
+    resource_class: large
     environment:
       TZ: Asia/Shanghai
     steps:
