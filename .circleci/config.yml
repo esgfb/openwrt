@@ -2,8 +2,7 @@ version: 2.1
 
 jobs:
   build-openwrt:
-    machine:
-      image: ubuntu-2404:2026.02.2
+    machine: true
     environment:
       TZ: Asia/Shanghai
     steps:
