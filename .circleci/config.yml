@@ -1,0 +1,133 @@
+version: 2.1
+
+jobs:
+  build-openwrt:
+    machine:
+      - image: ubuntu:22.04
+    resource_class: large  # 4核/8GB
+    environment:
+      TZ: Asia/Shanghai
+    steps:
+      - checkout
+      
+      # 步骤1：设置编译环境
+      - run: |
+          echo "开始配置编译环境..."
+          apt-get update
+          apt-get install -y build-essential ccache fastjar file g++ gawk \
+          gettext git libelf-dev libncurses5-dev libncursesw5-dev libssl-dev \
+          python3 python3-dev rsync subversion swig time unzip wget \
+          xsltproc zlib1g-dev
+
+          # 配置 ccache
+          mkdir -p /tmp/ccache
+          ccache --max-size=5G
+          
+          echo "✅ 环境配置完成"
+      
+      # 步骤2：克隆源代码
+      - run: |
+          echo "克隆 OpenWrt 源码到 openwrt 目录"
+          git clone -b openwrt-25.12 https://git.openwrt.org/openwrt/openwrt.git
+          
+          cd openwrt
+          
+          echo "开始复制自定义 Luci 应用到 package 目录..."
+          
+          # 逐个复制自定义应用
+          cp -r ../luci-app-nfs package/ || { echo "❌ 复制 luci-app-nfs 失败"; exit 1; }
+          cp -r ../luci-app-poweroff package/ || { echo "❌ 复制 luci-app-poweroff 失败"; exit 1; }
+          cp -r ../luci-app-rclone package/ || { echo "❌ 复制 luci-app-rclone 失败"; exit 1; }
+          cp -r ../luci-app-tcpdump package/ || { echo "❌ 复制 luci-app-tcpdump 失败"; exit 1; }
+          cp -r ../luci-app-tormanager package/ || { echo "❌ 复制 luci-app-tormanager 失败"; exit 1; }
+          
+          echo "✅ 所有应用复制成功"
+          
+          # 检查 feeds.conf.default
+          if [ ! -f ../feeds.conf.default ]; then
+            echo "❌ 错误：未在根目录找到 feeds.conf.default 文件"
+            exit 1
+          fi
+          
+          cp ../feeds.conf.default .
+          echo "✅ 已替换 feeds.conf.default"
+          
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          
+          echo "✅ Feeds 更新完成"
+      
+      # 步骤3：配置固件
+      - run: |
+          echo "开始配置固件..."
+          cd openwrt
+          
+          if [ ! -f ../.config ]; then
+            echo "❌ 错误：未在根目录找到 .config 文件"
+            exit 1
+          fi
+          
+          cp ../.config .config
+          echo "✅ 已复制 .config 到 openwrt 中"
+          echo "✅ 固件配置完成"
+      
+      # 步骤4：编译准备
+      - run: |
+          echo "开始编译准备阶段 (tools + toolchain)"
+          cd openwrt
+          
+          export USE_CCACHE=1
+          export CCACHE_DIR=/tmp/ccache
+          export CCACHE_MAXSIZE=5G
+          
+          make prepare -j4 V=sc
+          
+          echo "✅ 准备阶段完成"
+      
+      # 步骤5：完整编译
+      - run: |
+          echo "开始完整编译"
+          cd openwrt
+          
+          export USE_CCACHE=1
+          export CCACHE_DIR=/tmp/ccache
+          export CCACHE_MAXSIZE=5G
+          
+          mkdir -p ../build-logs
+          
+          make -j4 V=sc 2>&1 | tee ../build-logs/full-build.log
+          tail -100 ../build-logs/full-build.log > ../build-logs/last-100.log
+          
+          echo "✅ 固件编译完成"
+      
+      # 步骤6：验证固件
+      - run: |
+          echo "🔍 检查固件文件..."
+          
+          FIRMWARE_COUNT=$(find openwrt/bin/targets -type f \( -name "*.bin" -o -name "*.img" -o -name "*.gz" \) 2>/dev/null | wc -l)
+          
+          if [ "$FIRMWARE_COUNT" -gt 0 ]; then
+            echo "✅ 找到 $FIRMWARE_COUNT 个固件文件"
+            echo "📁 固件列表："
+            find openwrt/bin/targets -type f \( -name "*.bin" -o -name "*.img" -o -name "*.gz" \) -exec ls -lh {} \; | awk '{print $5 "\t" $9}'
+          else
+            echo "❌ 错误：未找到固件文件"
+          fi
+      
+      # 步骤7：保存固件
+      - store_artifacts:
+          path: openwrt/bin/targets
+          destination: openwrt-firmware
+      
+      - store_artifacts:
+          path: build-logs
+          destination: build-logs
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - build-openwrt:
+          filters:
+            branches:
+              only: main
